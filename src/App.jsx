@@ -1,10 +1,9 @@
-import Navbar from './Components/Navbar/Navbar'
-import './App.css'
-import Admin from './Pages/Admin/Admin'
+import Navbar from './Components/Navbar'
+import Admin from './Pages/Admin'
 
 function App() {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 font-sans">
       <Navbar/>
       <Admin/>
     </div>
