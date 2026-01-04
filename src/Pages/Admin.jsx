@@ -9,8 +9,9 @@ const Admin = () => {
       <Sidebar/>
       <div className="flex-1">
         <Routes>
-          <Route path='/addproduct' element={<AddProduct/>}/>
-          <Route path='/listproduct' element={<ListProduct/>}/>
+          <Route index element={<div className="p-6">Welcome to the dashboard</div>} />
+          <Route path='addproduct' element={<AddProduct/>}/>
+          <Route path='listproduct' element={<ListProduct/>}/>
         </Routes>
       </div>
     </div>
