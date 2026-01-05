@@ -1,6 +1,8 @@
 import upload_area from '../assets/upload_area.svg'
 import { useState } from 'react'
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:4000';
+
 const AddProduct = () => {
   const [image, setImage] = useState(false);
   const [productDetails, setProductDetails] = useState({
@@ -27,7 +29,7 @@ const AddProduct = () => {
     let formData = new FormData();
     formData.append('product', image);
 
-    await fetch('http://localhost:4000/upload',{
+    await fetch(`${SERVER_URL}/upload`,{
       method: 'POST',
       headers:{
         Accept: 'application/json'
@@ -38,7 +40,7 @@ const AddProduct = () => {
     if(responseData.success){
       product.image = responseData.image_url;
       console.log(product);
-      await fetch('http://localhost:4000/addproduct',{
+      await fetch(`${SERVER_URL}/addproduct`,{
         method:'POST',
         headers:{
           Accept: 'application/json',
