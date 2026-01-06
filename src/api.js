@@ -22,10 +22,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err && err.res && err.res.status === 401) {
+    if (err && err.response && err.response.status === 401) {
       try {
         localStorage.removeItem('token');
-      } catch (e) {
+        localStorage.removeItem('user');
+      } catch {
         // ignore localStorage errors
       }
       if (typeof window !== 'undefined') {

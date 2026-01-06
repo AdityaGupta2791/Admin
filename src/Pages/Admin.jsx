@@ -1,6 +1,9 @@
 import AddProduct from '../Components/AddProduct'
-import ListProduct from '../Components/ListProduct'
+import EditProduct from "../Components/EditProduct"
+import Products from "../Components/Products"
+import Orders from "../Components/Orders"
 import Sidebar from '../Components/Sidebar'
+import Dashboard from "../Components/Dashboard"
 import { Routes, Route } from 'react-router-dom'
 
 const Admin = () => {
@@ -9,9 +12,11 @@ const Admin = () => {
       <Sidebar/>
       <div className="flex-1">
         <Routes>
-          <Route index element={<div className="p-6">Welcome to the dashboard</div>} />
-          <Route path='addproduct' element={<AddProduct/>}/>
-          <Route path='listproduct' element={<ListProduct/>}/>
+          <Route index element={<Dashboard />} />
+          <Route path='addproduct' element={<AddProduct />}/>
+          <Route path='listproduct' element={<Products />}/>
+          <Route path="/editproduct/:id" element={<EditProduct />} />
+          <Route path="/orders" element={<Orders />} />
         </Routes>
       </div>
     </div>

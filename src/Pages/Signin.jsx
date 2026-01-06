@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import api from '../api'
 
 const Signin = () => {
@@ -64,7 +64,7 @@ const Signin = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-fuchsia-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-red-100 px-4">
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
           Admin Sign In
@@ -118,13 +118,6 @@ const Signin = () => {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
-
-          <div className="text-center font-medium text-gray-700 pb-4">
-            Don't have an account?{' '}
-            <Link to="/signup" className="underline text-red-500">
-              Sign up
-            </Link>
-          </div>
         </form>
       </div>
     </div>

@@ -1,48 +1,67 @@
 import upload_area from '../assets/upload_area.svg'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import api from '../api'
 import { useToast } from '../utils/ToastProvider'
 
-const AddProduct = () => {
+const EditProduct = () => {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { showToast } = useToast()
 
-  const [image, setImage] = useState(null)
-
+  const [image, setImage] = useState(null)        
+  const [preview, setPreview] = useState(null)   
   const [productDetails, setProductDetails] = useState({
     name: "",
     category: "men",
     new_price: "",
-    old_price: ""
+    old_price: "",
+    image: ""
   })
 
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
 
-  const { showToast } = useToast()
+  // ---------- FETCH PRODUCT ----------
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await api.get(`/products/allproducts`)
+        const prod = res.data.products.find(p => p._id === id)
+
+        if (!prod) return showToast("Product not found")
+
+        setProductDetails(prod)
+        setPreview(prod.image)
+      } catch {
+        showToast("Failed to load product")
+      }
+    }
+
+    fetchProduct()
+  }, [id, showToast])
 
 
   // ---------- HANDLERS ----------
   const imageHandler = (e) => {
-    setImage(e.target.files[0])
+    const file = e.target.files[0]
+    setImage(file)
+    if (file) setPreview(URL.createObjectURL(file))
   }
 
   const changeHandler = (e) => {
     setProductDetails({ ...productDetails, [e.target.name]: e.target.value })
   }
 
-
-  // ---------- VALIDATION ----------
   const validate = () => {
     const temp = {}
 
     if (!productDetails.name.trim()) temp.name = "Product name is required"
-
     if (!productDetails.old_price) temp.old_price = "Price is required"
     else if (isNaN(productDetails.old_price)) temp.old_price = "Price must be a number"
 
     if (!productDetails.new_price) temp.new_price = "Offer price is required"
     else if (isNaN(productDetails.new_price)) temp.new_price = "Offer price must be a number"
-
-    if (!image) temp.image = "Please select an image"
 
     setErrors(temp)
     return Object.keys(temp).length === 0
@@ -50,43 +69,34 @@ const AddProduct = () => {
 
 
   // ---------- SUBMIT ----------
-  const Add_Product = async () => {
+  const updateProduct = async () => {
     if (!validate()) return
     setLoading(true)
 
     try {
-      // upload image
-      const formData = new FormData()
-      formData.append("product", image)
+      let image_url = productDetails.image
 
-      const uploadRes = await api.post("/products/upload", formData)
-      const image_url = uploadRes?.data?.image_url
+      // if new image selected → upload first
+      if (image) {
+        const formData = new FormData()
+        formData.append("product", image)
 
-      if (!image_url) throw new Error("Image upload failed")
-
-      // send product data
-      const payload = { ...productDetails, image: image_url }
-
-      const res = await api.post("/products/addproduct", payload)
-
-      if (res?.data?.success) {
-        showToast("Product added successfully")
-
-        setProductDetails({
-          name: "",
-          category: "men",
-          new_price: "",
-          old_price: ""
-        })
-
-        setImage(null)
-        setErrors({})
-      } else {
-        showToast(res?.data?.message || "Failed to add product")
+        const uploadRes = await api.post("/products/upload", formData)
+        image_url = uploadRes?.data?.image_url
       }
 
+      const payload = {
+        ...productDetails,
+        image: image_url
+      }
+
+      await api.put(`/products/product/${id}`, payload)
+
+      showToast("Product updated successfully")
+      navigate("/dashboard/listproduct")
+
     } catch (err) {
-      showToast(err?.response?.data?.message || "Server error")
+      showToast(err?.response?.data?.message || "Failed to update product")
     } finally {
       setLoading(false)
     }
@@ -96,8 +106,7 @@ const AddProduct = () => {
   return (
     <div className="w-full max-w-[800px] bg-white rounded-[6px] px-[50px] py-[30px] mx-10 my-6 box-border">
 
-      <h2 className="text-xl font-semibold mb-4">Add Product</h2>
-
+      <h2 className="text-xl font-semibold mb-4">Edit Product</h2>
 
       {/* Name */}
       <div className="mb-4">
@@ -107,16 +116,13 @@ const AddProduct = () => {
           onChange={changeHandler}
           type="text"
           name="name"
-          placeholder="Type here"
           className="w-full h-[50px] border rounded px-3"
         />
         {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
       </div>
 
-
       {/* Prices */}
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
-
+      <div className="flex gap-4 mb-4">
         <div className="flex-1">
           <p>Price</p>
           <input
@@ -124,7 +130,6 @@ const AddProduct = () => {
             onChange={changeHandler}
             name="old_price"
             className="w-full h-[50px] border rounded px-3"
-            placeholder="Type here"
           />
           {errors.old_price && <p className="text-xs text-red-600">{errors.old_price}</p>}
         </div>
@@ -136,13 +141,10 @@ const AddProduct = () => {
             onChange={changeHandler}
             name="new_price"
             className="w-full h-[50px] border rounded px-3"
-            placeholder="Type here"
           />
           {errors.new_price && <p className="text-xs text-red-600">{errors.new_price}</p>}
         </div>
-
       </div>
-
 
       {/* Category */}
       <div className="mb-4">
@@ -159,39 +161,33 @@ const AddProduct = () => {
         </select>
       </div>
 
-
       {/* Image */}
       <div className="mt-4">
-        <label htmlFor="file-input" className="cursor-pointer inline-block">
+        <label htmlFor="img" className="cursor-pointer inline-block">
           <img
+            src={preview || upload_area}
             className="w-[120px] h-[120px] object-contain rounded"
-            src={image ? URL.createObjectURL(image) : upload_area}
-            alt=""
           />
         </label>
 
         <input
-          id="file-input"
+          id="img"
           hidden
           type="file"
           onChange={imageHandler}
         />
-
-        {errors.image && <p className="text-xs text-red-600">{errors.image}</p>}
       </div>
-
 
       {/* Submit */}
       <button
-        onClick={Add_Product}
+        onClick={updateProduct}
         disabled={loading}
         className="mt-5 w-[160px] h-[50px] bg-blue-500 text-white rounded disabled:opacity-60"
       >
-        {loading ? "Adding..." : "Add"}
+        {loading ? "Updating..." : "Update"}
       </button>
-
     </div>
   )
 }
 
-export default AddProduct
+export default EditProduct

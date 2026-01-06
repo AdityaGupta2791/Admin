@@ -15,9 +15,9 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed top-5 right-5 z-50 pointer-events-none">
+      <div className="fixed bottom-5 right-5 z-50 pointer-events-none">
         {toast && (
-          <div className="pointer-events-auto bg-white px-4 py-2 rounded shadow">
+          <div className="pointer-events-auto bg-red-100 px-4 py-2 rounded shadow">
             {toast.message}
           </div>
         )}
